@@ -1,0 +1,120 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <ui:composition template="/kisten-template.xhtml">
+        <ui:define name="title">Kisten</ui:define>
+        <ui:define name="body">
+            <h2>neue Kiste</h2>
+            <h:form id="addKisteForm">
+                <h:panelGrid columns="3">
+                    <h:outputLabel for="addNummer" 
+                                   value="Kistennummer: " />
+                    <h:inputText id="addNummer" 
+                                 required="true" 
+                                 requiredMessage="bitte Kistennummer eintragen!"
+                                 value="#{kistenBacking.kiste.nummer}" 
+                                 converterMessage="als Kistennummer bitte eine Zahl größer 0 eintragen!"
+                                 validator="#{kistenBacking.validateNummer}" >
+                        <f:ajax event="keyup" execute="addNummer" render="addNummerMessage"/>
+                    </h:inputText>
+                    <h:message id="addNummerMessage" for="addNummer" />
+
+                    <h:outputLabel for="addStandort" 
+                                   value="Standort: " />
+                    <h:inputText id="addStandort" 
+                                 required="true" 
+                                 requiredMessage="bitte Standort eintragen!"
+                                 value="#{kistenBacking.kiste.standort}" >
+                        <f:validator validatorId="blankNameValidator" />
+                        <f:ajax event="keyup" execute="addStandort" render="addStandortMessage" />
+                    </h:inputText>
+                    <h:message id="addStandortMessage" for="addStandort"/>
+
+                    <h:outputLabel for="addFuellgrad" 
+                                   value="Füllgrad: " />
+                    <h:inputText id="addFuellgrad" 
+                                 value="#{kistenBacking.kiste.fuellgrad}" 
+                                 required="true" 
+                                 requiredMessage="bitte Füllgrad eintragen!"
+                                 converter="jakarta.faces.Float"
+                                 converterMessage="Als Füllgrad bitte eine Zahl zwischen 0.0 und 1.0 eingetragen!"
+                                 validator="#{kistenBacking.validateFuellgrad}">
+                        <f:ajax event="keyup" execute="addFuellgrad" render="addFuellgradMessage" />
+                    </h:inputText>
+                    <h:message id="addFuellgradMessage" for="addFuellgrad"/>
+
+                    <f:facet name="footer">
+                        <h:commandButton value="Add" action="#{kistenBacking.addKiste}" />
+                        <h:commandButton value="Reset" />
+                    </f:facet>
+                </h:panelGrid>
+            </h:form>
+            <h2>alle Kisten</h2>
+            <h:form id="alleKistenForm">
+                <h:dataTable id="kistenTable" 
+                             var="kiste" 
+                             value="#{kistenBacking.kisten}">
+                    <h:column id="nummerColumn">
+                        <f:facet name="header">
+                            <h:outputText value="Kistennummer" />
+                        </f:facet>
+                        <h:outputText id="alleKistenNummer" 
+                                      value="#{kiste.nummer}" />
+                    </h:column>
+
+                    <h:column id="standortColumn">
+                        <f:facet name="header">
+                            <h:outputText value="Standort" />
+                        </f:facet>
+                        <h:inputText id="updateStandortInput" 
+                                     value="#{kiste.standort}" 
+                                     title="Standort" >
+                            <f:validator validatorId="blankNameValidator" />
+                            <f:ajax event="keyup" 
+                                    execute="updateStandortInput" 
+                                    render="updateStandortMessage" />
+                        </h:inputText>
+                    </h:column>
+
+                    <h:column id="fuellgradColumn">
+                        <f:facet name="header">
+                            <h:outputText value="Füllgrad" />
+                        </f:facet>
+                        <h:inputText id="updateFuellgradInput"
+                                     required="true"
+                                     requiredMessage="bitte Wert zwischen 0 und 1 eintragen!"
+                                     converter="jakarta.faces.Float"
+                                     converterMessage="Als Füllgrad bitte eine Zahl zwischen 0.0 und 1.0 eingetragen!"
+                                     value="#{kiste.fuellgrad}"
+                                     validator="#{kistenBacking.validateFuellgrad}"
+                                     title="Füllgrad">
+                            <!--f:valueChangeListener type="com.ma.kisten.listeners.FuellgradChangedListener" /-->
+                            <f:ajax event="keyup" execute="updateFuellgradInput" render="updateFuellgradMessage" />
+                        </h:inputText>
+                    </h:column>
+
+                    <h:column id="deleteColumn">
+                        <h:commandButton id="deleteButton"
+                                         type="Submit" 
+                                         value="delete" 
+                                         actionListener="#{kistenBacking.deleteListener}" 
+                                         action="#{kistenBacking.delete(kiste)}" >
+                            <f:ajax render="@form deleteMessage" /> <!-- execute="deleteButton" -->
+                        </h:commandButton>
+                    </h:column>
+                    <h:column id="messagesColumn">
+                        <h:message id="updateStandortMessage" for="updateStandortInput"/>
+                        <h:message id="updateFuellgradMessage" for="updateFuellgradInput"/>
+                        <h:message id="deleteMessage" for="deleteButton" />
+                    </h:column>
+                </h:dataTable>
+                <h:commandButton id="saveButton" value="Save" action="#{kistenBacking.update}">
+                    <f:ajax execute="@form" render="@form"/>
+                </h:commandButton>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>

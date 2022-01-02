@@ -1,0 +1,200 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <ui:composition template="/kisten-template.xhtml">
+        <ui:define name="title">Inhalte</ui:define>
+        <ui:define name="body">
+            <h:form>
+                <h2>neuer Inhalt</h2>
+                <h:panelGrid columns="3">
+                    <h:outputLabel for="inhaltInput" rendered="true" value="Inhalt: " />
+                    <h:inputText id="inhaltInput" 
+                                 required="true" 
+                                 requiredMessage="Inhalt erforderlich." 
+                                 value="#{inhaltBacking.inhaltName}" />
+                    <h:message id="inhaltMessage" for="inhaltInput"/>
+
+                    <h:outputLabel for="nummerInput" value="Kiste: " />
+                    <h:inputText id="nummerInput" 
+                                 required="true" 
+                                 requiredMessage="Kistennummer erforderlich." 
+                                 converterMessage="als Kistennummer bitte eine Zahl größer 0 eintragen!"
+                                 validator="#{inhaltBacking.validateKistenNummer}"
+                                 value="#{inhaltBacking.kistenNummer}" >
+                        <f:ajax event="keyup" 
+                                execute="nummerInput" 
+                                render="nummerMessage" 
+                                />
+                    </h:inputText>
+                    <h:message id="nummerMessage" for="nummerInput" />
+
+                    <h:outputLabel for="selectKategorie" value="Kategorie: " />
+                    <h:selectOneMenu id="selectKategorie" value="#{inhaltBacking.kategorieName}" 
+                                     required="true" requiredMessage="Kategorie erforderlich" >
+                        <f:selectItems value="#{inhaltBacking.kategorieNamen}"/>
+                    </h:selectOneMenu>
+                    <h:message id="kategorieMessage" for="selectKategorie"/>
+
+                    <h:outputLabel for="eigentuemerSelect" value="Eigentümer: " />
+                    <h:selectOneMenu id="eigentuemerSelect" value="#{inhaltBacking.eigentuemerName}" 
+                                     required="true" requiredMessage="Eigentümer erforderlich" >
+                        <f:selectItems value="#{inhaltBacking.eigentuemerNamen}"/>
+                    </h:selectOneMenu>
+                    <h:message id="eigentuemerMessage" for="eigentuemerSelect"/>
+
+                    <f:facet name="footer">
+                        <h:commandButton id="submit" value="Add" action="#{inhaltBacking.addInhalt}" />
+                    </f:facet>
+                </h:panelGrid>
+            </h:form>
+
+
+            <h2>alle Inhalte</h2>
+            <h:form>
+                <h:dataTable 
+                    var="inhaltWrapper"
+                    summary="Alle Inhalte"
+                    value="#{inhaltBacking.inhaltWrapperList}"
+                    rules="all"
+                    cellpadding="5">
+
+                    <!--h:column>
+                        <f:facet name="header">
+                                <h:outputText value="Id" />
+                        </f:facet>
+                        <h:inputText value="{inhaltWrapper.id}" />
+                    </h:column--><!-- comment -->
+                    <h:column>
+                        <f:facet name="header">
+                            <h:panelGrid columns="2" >
+                                <h:outputText value="Inhalt" />
+                                <h:commandButton action="#{inhaltBacking.orderByInhalt}" 
+                                                 value=">"/>
+                            </h:panelGrid>
+                        </f:facet>
+                        <h:inputHidden value="#{inhaltWrapper.id}" />
+                        <h:inputText value="#{inhaltWrapper.inhaltName}" />
+                    </h:column>
+                
+                    <h:column>
+                        <f:facet name="header">
+                            <h:panelGrid columns="2" >
+                                <h:outputText value="Kistennummer" />
+                                <h:commandButton action="#{inhaltBacking.orderByKistenNummer}"
+                                                 value=">" />
+                              
+                            </h:panelGrid>
+                        </f:facet>
+                        <h:inputText id="updateNummerInput"
+                                     required="true" 
+                                     requiredMessage="Kistennummer erfoderlich"
+                                     converterMessage="als Kistennummer bitte eine Zahl größer 0 eintragen!"
+                                     validator="#{inhaltBacking.validateKistenNummer}"
+                                     value="#{inhaltWrapper.kistenNummer}" >
+                            <f:ajax  event="keyup" 
+                                     render="updateNummerMessage updateNummerInput updateStandortInput updateFuellgradInput"
+                                     listener="#{inhaltBacking.kisteChangedAjax}" />
+                        </h:inputText>
+                    </h:column>
+
+                    <h:column id="standortColumn">
+                        <f:facet name="header">
+                            <h:panelGrid columns="2" >
+                                <h:outputText value="Standort" />
+                                <h:commandButton action="#{inhaltBacking.orderByStandort}" 
+                                                 value=">"/>
+                            </h:panelGrid>
+                        </f:facet>
+                        <h:inputText id="updateStandortInput" 
+                                     title="Standort" 
+                                     value="#{inhaltWrapper.standort}" 
+                                     required="true" 
+                                     requiredMessage="bitte Standort eintragen!">
+                            <f:validator validatorId="blankNameValidator" />
+                            <f:ajax event="change" 
+                                    execute="updateStandortInput" 
+                                    render="updateStandortInput" 
+                                    listener="#{inhaltBacking.standortChangedAjax}"/>
+                        </h:inputText>
+                    </h:column>
+
+                    <h:column id="FuellgradColumn">
+                        <f:facet name="header">
+                            <h:panelGrid columns="2" >
+                                <h:outputText value="Füllgrad" />
+                                <h:commandButton action="#{inhaltBacking.orderByFuellgrad}" 
+                                                 value=">"/>
+                            </h:panelGrid>
+                        </f:facet>
+                        <h:inputText id="updateFuellgradInput" 
+                                     value="#{inhaltWrapper.fuellgrad}" 
+                                     required="true"
+                                     requiredMessage="bitte Wert zwischen 0 und 1 eintragen!"
+                                     converter="jakarta.faces.Float"
+                                     converterMessage="Als Füllgrad bitte eine Zahl zwischen 0.0 und 1.0 eingetragen!"
+                                     validator="#{kistenBacking.validateFuellgrad}"
+                                     title="Füllgrad">
+                            <f:ajax event="change" 
+                                    execute="updateFuellgradInput" 
+                                    render="updateFuellgradMessage"
+                                    listener="#{inhaltBacking.fuellgradChangedAjax}"/>
+                        </h:inputText>
+                    </h:column>
+
+                    <h:column id="KategorieColumn">
+                        <f:facet name="header">
+                            <h:panelGrid columns="2" >
+                                <h:outputText value="Kategorie" />
+                                <h:commandButton action="#{inhaltBacking.orderByKategorie}" 
+                                                 value=">"/>
+                            </h:panelGrid>
+                        </f:facet>
+                        <h:panelGrid columns="2" >
+                            <h:selectOneMenu id="selectKategorieMenu" 
+                                             value="#{inhaltWrapper.kategorieName}" >
+                                <f:selectItems value="#{inhaltBacking.kategorieNamen}"  />
+                            </h:selectOneMenu>
+                            <h:commandButton type="Submit" value="+"/>
+                        </h:panelGrid>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">
+                            <h:panelGrid columns="2" >
+                                <h:outputText value="Eigentümer" />
+                                <h:commandButton action="#{inhaltBacking.orderByEigentuemer}" 
+                                                 value=">"/>
+                            </h:panelGrid>
+                        </f:facet>
+                        <h:panelGrid columns="2" >
+                            <h:selectOneMenu id="selectEigentuemerMenu" 
+                                             value="#{inhaltWrapper.eigentuemerName}" >
+                                <f:selectItems value="#{inhaltBacking.eigentuemerNamen}"  />
+                            </h:selectOneMenu>
+                            <h:commandButton type="Submit" 
+                                             value="+"/>
+                        </h:panelGrid>
+                    </h:column>
+
+                    <h:column>
+                        <h:commandButton type="Submit" 
+                                         value="delete" 
+                                         action="#{inhaltBacking.delete(inhaltWrapper)}"/>
+                    </h:column>
+                    <h:column>
+                        <h:message id="updateNummerMessage" for="updateNummerInput" />
+                        <h:message id="updateStandortMessage" for="updateStandortInput" />
+                        <h:message id="updateFuellgradMessage" for="updateFuellgradInput"/>
+                    </h:column>
+                </h:dataTable>
+
+                <h:commandButton id="save" 
+                                 value="Save" 
+                                 action="#{inhaltBacking.update}" />
+                    
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>

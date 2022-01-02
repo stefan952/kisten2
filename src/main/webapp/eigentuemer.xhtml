@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <ui:composition template="/kisten-template.xhtml">
+        <ui:define name="title">Eigentümer</ui:define>
+        <ui:define name="body">
+            <h2>neuer Eigentümer</h2>
+            <h:form id="addEigentuemerForm">
+                <h:panelGrid columns="3">
+                    <h:outputLabel for="eigentuemerName" 
+                                   value="Eigentümer: " />
+                    <h:inputText id="eigentuemerName" 
+                                 required="true" 
+                                 requiredMessage="Feld darf nicht frei bleiben!"
+                                 value="#{eigentuemerBacking.eigentuemer.name}" 
+                                 validator="#{eigentuemerBacking.validateEigentuemer}">
+                        <f:validator validatorId="blankNameValidator" />
+                        <f:ajax event="keyup" execute="eigentuemerName" render="eigentuemerMessage"/>
+                    </h:inputText>      
+                    <h:message id="eigentuemerMessage" for="eigentuemerName" />
+                    <f:facet name="footer">
+                        <h:commandButton value="Add" action="#{eigentuemerBacking.add}" />
+                    </f:facet>
+                </h:panelGrid>
+            </h:form>
+            <h2>alle Eigentümer</h2>
+            <h:form>
+                <h:dataTable id="eigentuemerList" 
+                             value="#{eigentuemerBacking.eigentuemerListe}"
+                             var="eigentuemer" >
+                    <h:column >
+                        <f:facet name="header">
+                            <h:outputText value="ID" />
+                        </f:facet>
+                        <h:outputText value="#{eigentuemer.id}" />
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">
+                            <h:outputText value="Name" />
+                        </f:facet>
+                        <h:inputText id="nameUpdate" 
+                                     required="true" 
+                                     requiredMessage="Name erforderlich"
+                                     validator="#{eigentuemerBacking.validateUpdateEigentuemer}"
+                                     value="#{eigentuemer.name}" >
+                            <f:validator validatorId="blankNameValidator" />
+                            <f:ajax />
+                        </h:inputText>
+                    </h:column>
+                    <h:column>
+                        <h:commandButton id="deleteButton" 
+                                         type="Submit" 
+                                         value="delete" 
+                                         actionListener="#{eigentuemerBacking.deleteListener}"
+                                         action="#{eigentuemerBacking.delete(eigentuemer)}">
+                            <f:ajax render="@form deleteMessage" /> <!-- execute="deleteButton" -->
+                        </h:commandButton>
+                    </h:column>
+                    <h:column>
+                        <h:message for="nameUpdate" />
+                        <h:message id="deleteMessage" for="deleteButton" />
+                    </h:column>
+                </h:dataTable>
+                <h:commandButton id="save" value="Save" action="#{eigentuemerBacking.update}" />
+                <!--f:ajax execute="@form" render="@form"/>
+            </h:commandButton-->
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>
